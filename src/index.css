@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --bg: #08080a;
+  --surface: #101013;
+  --surface-2: #17171c;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --text-1: #ececee;
+  --text-2: #8a8a96;
+  --text-3: #52525e;
+  --accent: #5e6ad2;
+  --accent-dim: rgba(94, 106, 210, 0.15);
+  --green: #3ecba5;
+  --green-dim: rgba(62, 203, 165, 0.12);
+  --amber: #e8a84b;
+  --amber-dim: rgba(232, 168, 75, 0.12);
+  --red: #e06c75;
+  --red-dim: rgba(224, 108, 117, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-1);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 2px;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
