@@ -20,36 +20,77 @@
     }
   },
   "features": [
+    { "num": "01", "title": "Map Exploration", "ko": "지역 기반 장소 탐색", "desc": "지도 위에서 주변 장소를 발견하고, 다른 사람들의 코스를 시각적으로 탐색합니다." },
+    { "num": "02", "title": "Course Creation", "ko": "나만의 코스 제작", "desc": "방문할 장소를 순서대로 이어 나만의 여행·데이트 코스를 직접 설계합니다." },
+    { "num": "03", "title": "Route SNS", "ko": "코스 기반 경험 공유", "desc": "지도와 동선이 포함된 형태로 경험을 공유합니다. 장소가 아닌 코스를 나눕니다." },
+    { "num": "04", "title": "Navigation", "ko": "코스 따라가기", "desc": "공유된 코스를 그대로 따라가며 같은 경험을 재현할 수 있습니다." },
+    { "num": "05", "title": "AI Recommendation", "ko": "맞춤 여행 추천", "desc": "취향과 상황에 맞는 코스를 AI가 자동으로 추천하고 구성합니다." }
+  ],
+  "currentStatus": {
+    "phase": "Phase 1 — Foundation",
+    "completed": [
+      "서비스 방향 정의",
+      "React Native 개발 환경 구축",
+      "Firebase 연결",
+      "Firestore 구조 설계",
+      "브랜드 아이덴티티 수립"
+    ],
+    "inProgress": [
+      "UI/UX 핵심 화면 개발",
+      "Google Maps API 연동",
+      "코스 생성 플로우 구현"
+    ],
+    "next": [
+      "인증 시스템 구축",
+      "SNS 피드 기능",
+      "AI 추천 기능",
+      "App Store 제출 준비"
+    ]
+  },
+  "designSystem": {
+    "brandKeywords": ["Travel", "Experience", "Connection", "Discovery"],
+    "designReferences": ["Apple", "Airbnb", "Linear", "Notion"],
+    "colors": [
+      { "name": "주조색 (기본)", "hex": "#FFFFFF", "label": "White" },
+      { "name": "강조색 (포인트)", "hex": "#E6B7C7", "label": "Rose Pink" },
+      { "name": "보조색", "hex": "#6D9EEB", "label": "Sky Blue" },
+      { "name": "배경", "hex": "#F7F7F7", "label": "Light Gray" },
+      { "name": "텍스트", "hex": "#222222", "label": "Charcoal" }
+    ],
+    "typography": "Pretendard",
+    "principles": [
+      { "title": "따뜻함", "desc": "사람들의 소중한 하루를 기록하고 공유합니다." },
+      { "title": "경로", "desc": "당신의 하루를 더 특별하게 만들어 줄 최적의 경로를 제안합니다." },
+      { "title": "공유", "desc": "좋은 경험은 함께할 때 더 빛납니다." }
+    ]
+  },
+  "decisionLog": [
     {
-      "num": "01",
-      "title": "Map Exploration",
-      "ko": "지역 기반 장소 탐색",
-      "desc": "지도 위에서 주변 장소를 발견하고, 다른 사람들의 코스를 시각적으로 탐색합니다."
+      "date": "2026.08",
+      "title": "React Native 선택",
+      "reason": "iOS / Android 동시 개발과 빠른 MVP 검증을 위해 단일 코드베이스 방식을 채택했습니다."
     },
     {
-      "num": "02",
-      "title": "Course Creation",
-      "ko": "나만의 코스 제작",
-      "desc": "방문할 장소를 순서대로 이어 나만의 여행·데이트 코스를 직접 설계합니다."
+      "date": "2026.08",
+      "title": "Firebase Firestore 중심 구조 유지",
+      "reason": "기존 데이터 아키텍처를 보존하고 마이그레이션 복잡성을 방지하기 위해 결정했습니다."
     },
     {
-      "num": "03",
-      "title": "Route SNS",
-      "ko": "코스 기반 경험 공유",
-      "desc": "지도와 동선이 포함된 형태로 경험을 공유합니다. 장소가 아닌 코스를 나눕니다."
+      "date": "2026.07",
+      "title": "코스 중심 SNS 방향 확정",
+      "reason": "장소 단위가 아닌 동선(코스) 단위로 경험을 공유하는 차별화 방향을 확정했습니다."
     },
     {
-      "num": "04",
-      "title": "Navigation",
-      "ko": "코스 따라가기",
-      "desc": "공유된 코스를 그대로 따라가며 같은 경험을 재현할 수 있습니다."
-    },
-    {
-      "num": "05",
-      "title": "AI Recommendation",
-      "ko": "맞춤 여행 추천",
-      "desc": "취향과 상황에 맞는 코스를 AI가 자동으로 추천하고 구성합니다."
+      "date": "2026.07",
+      "title": "Pretendard 브랜드 폰트 선정",
+      "reason": "한국어 가독성과 현대적 감각을 동시에 충족하는 서체로 선정했습니다."
     }
+  ],
+  "futureVision": [
+    { "num": "01", "title": "AI 여행 추천", "desc": "사용자의 취향과 이동 패턴을 학습해 완전 맞춤형 코스를 자동 생성합니다." },
+    { "num": "02", "title": "자동 일정 생성", "desc": "목적지와 날짜만 입력하면 최적의 여행 일정을 AI가 구성합니다." },
+    { "num": "03", "title": "개인 맞춤 Route", "desc": "과거 방문 코스와 선호 장소를 분석해 나만의 여행 스타일을 발견합니다." },
+    { "num": "04", "title": "글로벌 확장", "desc": "서울을 넘어 전 세계 여행자가 코스를 공유하는 글로벌 플랫폼으로 성장합니다." }
   ],
   "stack": [
     { "layer": "Frontend", "value": "React Native", "note": "Expo" },
@@ -59,27 +100,9 @@
     { "layer": "Platform", "value": "iOS / Android", "note": "App Store" }
   ],
   "agents": [
-    {
-      "name": "ChatGPT",
-      "role": "Product Manager",
-      "ko": "기능 기획 · 전략",
-      "color": "#10a37f",
-      "icon": "◈"
-    },
-    {
-      "name": "Claude",
-      "role": "Lead Developer",
-      "ko": "React Native · Firebase",
-      "color": "#cc785c",
-      "icon": "◆"
-    },
-    {
-      "name": "Gemini",
-      "role": "QA Engineer",
-      "ko": "테스팅 · UX 검토",
-      "color": "#4285f4",
-      "icon": "◇"
-    }
+    { "name": "ChatGPT", "role": "Product Manager", "ko": "기능 기획 · 전략", "color": "#10a37f", "icon": "◈" },
+    { "name": "Claude", "role": "Lead Developer", "ko": "React Native · Firebase", "color": "#C8698A", "icon": "◆" },
+    { "name": "Gemini", "role": "QA Engineer", "ko": "테스팅 · UX 검토", "color": "#6D9EEB", "icon": "◇" }
   ],
   "roadmap": [
     { "phase": "1", "label": "Foundation", "status": "active" },
