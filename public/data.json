@@ -1,0 +1,93 @@
+{
+  "project": {
+    "name": "Route",
+    "subtitle": "AI Travel Platform",
+    "tagline": "여행 계획부터 이동까지 연결하는 지도 기반 경험 공유 플랫폼",
+    "coreMessage": "장소가 아닌 코스를 공유한다.",
+    "currentPhase": "Phase 1",
+    "phaseLabel": "기반 구축",
+    "progress": 42,
+    "lastUpdated": "2026.08"
+  },
+  "vision": {
+    "problem": {
+      "title": "여행 계획은 여전히 불편합니다",
+      "desc": "지도 앱, 블로그, SNS를 오가며 정보를 수집하고, 직접 정리하고, 결국 공유는 텍스트 링크로 끝납니다. 경험은 사라지고 동선은 남지 않습니다."
+    },
+    "solution": {
+      "title": "모든 것을 하나로 통합합니다",
+      "desc": "검색, 지도, 코스 생성, SNS 공유를 하나의 플랫폼으로 통합합니다. Route에서 발견하고, 만들고, 나누고, 그대로 따라갑니다."
+    }
+  },
+  "features": [
+    {
+      "num": "01",
+      "title": "Map Exploration",
+      "ko": "지역 기반 장소 탐색",
+      "desc": "지도 위에서 주변 장소를 발견하고, 다른 사람들의 코스를 시각적으로 탐색합니다."
+    },
+    {
+      "num": "02",
+      "title": "Course Creation",
+      "ko": "나만의 코스 제작",
+      "desc": "방문할 장소를 순서대로 이어 나만의 여행·데이트 코스를 직접 설계합니다."
+    },
+    {
+      "num": "03",
+      "title": "Route SNS",
+      "ko": "코스 기반 경험 공유",
+      "desc": "지도와 동선이 포함된 형태로 경험을 공유합니다. 장소가 아닌 코스를 나눕니다."
+    },
+    {
+      "num": "04",
+      "title": "Navigation",
+      "ko": "코스 따라가기",
+      "desc": "공유된 코스를 그대로 따라가며 같은 경험을 재현할 수 있습니다."
+    },
+    {
+      "num": "05",
+      "title": "AI Recommendation",
+      "ko": "맞춤 여행 추천",
+      "desc": "취향과 상황에 맞는 코스를 AI가 자동으로 추천하고 구성합니다."
+    }
+  ],
+  "stack": [
+    { "layer": "Frontend", "value": "React Native", "note": "Expo" },
+    { "layer": "Backend", "value": "Firebase", "note": "Cloud Functions" },
+    { "layer": "Database", "value": "Firestore", "note": "NoSQL" },
+    { "layer": "Map API", "value": "Google Maps", "note": "Places + Routes" },
+    { "layer": "Platform", "value": "iOS / Android", "note": "App Store" }
+  ],
+  "agents": [
+    {
+      "name": "ChatGPT",
+      "role": "Product Manager",
+      "ko": "기능 기획 · 전략",
+      "color": "#10a37f",
+      "icon": "◈"
+    },
+    {
+      "name": "Claude",
+      "role": "Lead Developer",
+      "ko": "React Native · Firebase",
+      "color": "#cc785c",
+      "icon": "◆"
+    },
+    {
+      "name": "Gemini",
+      "role": "QA Engineer",
+      "ko": "테스팅 · UX 검토",
+      "color": "#4285f4",
+      "icon": "◇"
+    }
+  ],
+  "roadmap": [
+    { "phase": "1", "label": "Foundation", "status": "active" },
+    { "phase": "2", "label": "Authentication", "status": "next" },
+    { "phase": "3", "label": "Course Engine", "status": "planned" },
+    { "phase": "4", "label": "Community", "status": "planned" },
+    { "phase": "5", "label": "Map Experience", "status": "planned" },
+    { "phase": "6", "label": "AI Recommendation", "status": "planned" },
+    { "phase": "7", "label": "Launch", "status": "planned" }
+  ]
+}
