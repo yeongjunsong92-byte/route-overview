@@ -1,669 +1,486 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react';
+import { 
+  Compass, MapPin, Route as RouteIcon, Navigation, Sparkles, 
+  Cpu, Users, CheckCircle2, ArrowRight, 
+  GitBranch, Globe, Menu, X, Layers, Shield, Zap, Heart, Star
+} from 'lucide-react';
 
-/* ── types ── */
-type ProjectData = {
-  project: { name: string; subtitle: string; tagline: string; coreMessage: string; currentPhase: string; phaseLabel: string; progress: number; lastUpdated: string }
-  vision: { problem: { title: string; desc: string }; solution: { title: string; desc: string } }
-  features: { num: string; title: string; ko: string; desc: string }[]
-  currentStatus: { phase: string; completed: string[]; inProgress: string[]; next: string[] }
-  designSystem: { brandKeywords: string[]; designReferences: string[]; colors: { name: string; hex: string; label: string }[]; typography: string; principles: { title: string; desc: string }[] }
-  decisionLog: { date: string; title: string; reason: string }[]
-  futureVision: { num: string; title: string; desc: string }[]
-  stack: { layer: string; value: string; note: string }[]
-  agents: { name: string; role: string; ko: string; color: string; icon: string }[]
-  roadmap: { phase: string; label: string; status: string }[]
-}
-
-const FLOW = ['Discover', 'Create', 'Share', 'Navigate']
-const FLOW_KO = ['탐색', '제작', '공유', '이동']
-const FLOW_DESC = ['지도에서 코스를 발견', '나만의 코스를 설계', '경험을 SNS로 공유', '코스를 따라 이동']
-
-/* ── hooks ── */
-function useInView(threshold = 0.1) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
-  useEffect(() => {
-    const el = ref.current; if (!el) return
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true) }, { threshold })
-    obs.observe(el); return () => obs.disconnect()
-  }, [threshold])
-  return { ref, visible }
-}
-
-/* ── primitives ── */
-function Fade({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
-  const { ref, visible } = useInView()
-  return (
-    <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? 'none' : 'translateY(18px)', transition: `opacity 0.55s ease ${delay}s, transform 0.55s ease ${delay}s`, ...style }}>
-      {children}
-    </div>
-  )
-}
-
-function Section({ children, id }: { children: React.ReactNode; id?: string }) {
-  return (
-    <section id={id} style={{ padding: '88px 0', maxWidth: 900, margin: '0 auto', width: '100%' }}>
-      {children}
-    </section>
-  )
-}
-
-function Pad({ children }: { children: React.ReactNode }) {
-  return <div style={{ padding: '0 40px' }}>{children}</div>
-}
-
-function SectionLabel({ children, color }: { children: React.ReactNode; color?: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-      <span style={{ width: 18, height: 1, background: color ?? 'var(--accent)', display: 'inline-block' }} />
-      <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.14em', color: color ?? 'var(--accent)', textTransform: 'uppercase', fontWeight: 600 }}>
-        {children}
-      </span>
-    </div>
-  )
-}
-
-function BigTitle({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
-  return (
-    <h2 style={{ fontSize: 'clamp(32px, 4.5vw, 48px)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, color: 'var(--text-1)', marginBottom: 48, ...style }}>
-      {children}
-    </h2>
-  )
-}
-
-function Rule() {
-  return <div style={{ height: 1, background: 'var(--border)', maxWidth: 900, margin: '0 auto' }} />
-}
-
-function Tag({ children, color }: { children: React.ReactNode; color?: string }) {
-  return (
-    <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 600, color: color ?? 'var(--text-2)', background: color ? color + '14' : 'var(--surface-2)', border: `1px solid ${color ? color + '30' : 'var(--border)'}`, borderRadius: 5, padding: '3px 9px', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.04em' }}>
-      {children}
-    </span>
-  )
-}
-
-function Mono({ children, color }: { children: React.ReactNode; color?: string }) {
-  return <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.05em', color: color ?? 'var(--text-3)' }}>{children}</span>
-}
-
-/* ── main ── */
 export default function App() {
-  const [data, setData] = useState<ProjectData | null>(null)
-  const [scrollY, setScrollY] = useState(0)
+  const [activeTab, setActiveTab] = useState<'overview' | 'vision' | 'journey' | 'tech' | 'ai' | 'design'>('overview');
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => { fetch('/data.json').then(r => r.json()).then(setData) }, [])
-  useEffect(() => {
-    const h = () => setScrollY(window.scrollY)
-    window.addEventListener('scroll', h, { passive: true })
-    return () => window.removeEventListener('scroll', h)
-  }, [])
-
-  if (!data) return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--text-3)', fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
-      Loading...
-    </div>
-  )
-
-  const { project, vision: vis, features: feats, currentStatus: cs, designSystem: ds, decisionLog, futureVision, stack, agents, roadmap: rm } = data
-
-  const navItems = [
-    { label: 'Vision', href: '#vision' },
-    { label: 'Status', href: '#status' },
-    { label: 'Features', href: '#features' },
-    { label: 'Design', href: '#design' },
-    { label: 'Tech', href: '#tech' },
-    { label: 'Team', href: '#team' },
-    { label: 'Roadmap', href: '#roadmap' },
-    { label: 'Future', href: '#future' },
-  ]
+  const tabs = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'vision', label: 'Vision' },
+    { id: 'journey', label: 'Journey' },
+    { id: 'tech', label: 'Tech Stack' },
+    { id: 'ai', label: 'AI Team' },
+    { id: 'design', label: 'Design System' },
+  ] as const;
 
   return (
-    <div style={{ background: 'var(--bg)', color: 'var(--text-1)', overflowX: 'hidden' }}>
+    <div className="min-h-screen bg-[#050507] text-[#F5F5F7] font-sans antialiased selection:bg-[#E6B7C7] selection:text-[#111111] overflow-x-hidden">
+      {/* Ambient glowing background gradients */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-[#E6B7C7]/15 via-[#6D9EEB]/10 to-transparent rounded-full blur-[120px] pointer-events-none"></div>
 
-      {/* ── NAV ── */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 52, display: 'flex', alignItems: 'center', padding: '0 40px', justifyContent: 'space-between', background: scrollY > 60 ? 'rgba(245,245,247,0.92)' : 'transparent', backdropFilter: scrollY > 60 ? 'blur(20px)' : 'none', borderBottom: scrollY > 60 ? '1px solid var(--border)' : '1px solid transparent', transition: 'all 0.3s' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 24, height: 24, borderRadius: 6, background: 'linear-gradient(135deg, #E6B7C7, #6D9EEB)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 9L6 3L10 9" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      {/* Apple-style Glassmorphism Header */}
+      <header className="sticky top-0 z-50 bg-[#050507]/70 backdrop-blur-2xl border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setActiveTab('overview')}>
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#E6B7C7] to-[#6D9EEB] p-[1px] shadow-lg shadow-[#E6B7C7]/20 transition-transform group-hover:scale-105">
+              <div className="w-full h-full bg-[#121216] rounded-2xl flex items-center justify-center text-[#E6B7C7]">
+                <RouteIcon className="w-5 h-5" />
+              </div>
+            </div>
+            <div>
+              <span className="font-extrabold text-xl tracking-tight text-white">Route</span>
+              <span className="text-[10px] ml-2 px-2.5 py-0.5 rounded-full bg-white/10 text-[#E6B7C7] font-mono font-medium tracking-wider uppercase border border-white/10">Bootcamp HQ</span>
+            </div>
           </div>
-          <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: '-0.03em', color: 'var(--text-1)' }}>{project.name}</span>
-          <span style={{ fontSize: 11, color: 'var(--text-3)', marginLeft: 2, fontFamily: "'JetBrains Mono', monospace" }}>/ Project HQ</span>
-        </div>
-        <div style={{ display: 'flex', gap: 2 }}>
-          {navItems.map(({ label, href }) => (
-            <a key={label} href={href} style={{ fontSize: 12, color: 'var(--text-3)', textDecoration: 'none', padding: '4px 9px', borderRadius: 5, transition: 'all 0.15s' }}
-              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-1)'; (e.currentTarget as HTMLAnchorElement).style.background = 'var(--surface)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-3)'; (e.currentTarget as HTMLAnchorElement).style.background = 'transparent' }}>
-              {label}
+
+          <nav className="hidden lg:flex items-center space-x-1 bg-white/5 p-1 rounded-full border border-white/10 backdrop-blur-md">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 ${activeTab === tab.id ? 'bg-gradient-to-r from-[#E6B7C7] to-[#D49EB1] text-[#111111] shadow-md shadow-[#E6B7C7]/30 scale-[1.02]' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="hidden lg:flex items-center space-x-3">
+            <a 
+              href="https://github.com/yeongjunsong92-byte/Route-app-claud" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-semibold text-white shadow-lg transition-all hover:scale-105"
+            >
+              <GitBranch className="w-4 h-4 text-[#E6B7C7]" />
+              <span>GitHub Repository</span>
             </a>
-          ))}
-        </div>
-      </nav>
-
-      {/* ── COVER ── */}
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '120px 40px 80px', position: 'relative', overflow: 'hidden', maxWidth: 900, margin: '0 auto' }}>
-        {/* Ambient glow */}
-        <div style={{ position: 'absolute', top: '40%', left: '60%', transform: 'translate(-50%, -50%)', width: 600, height: 500, background: 'radial-gradient(ellipse, rgba(230,183,199,0.22) 0%, rgba(109,158,235,0.1) 50%, transparent 70%)', pointerEvents: 'none' }} />
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 48, alignItems: 'center', position: 'relative' }}>
-          {/* Left: wordmark */}
-          <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 20, padding: '5px 14px', marginBottom: 40, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', boxShadow: '0 0 0 3px rgba(76,175,125,0.2)', display: 'inline-block' }} />
-              <Mono color="var(--text-3)">{project.currentPhase} · {project.phaseLabel} · {project.lastUpdated}</Mono>
-            </div>
-
-            <h1 style={{ fontSize: 'clamp(68px, 11vw, 108px)', fontWeight: 900, letterSpacing: '-0.055em', lineHeight: 0.88, color: 'var(--text-1)', marginBottom: 28 }}>
-              {project.name.toUpperCase()}
-            </h1>
-
-            <p style={{ fontSize: 'clamp(15px, 2vw, 18px)', color: 'var(--text-2)', fontWeight: 400, letterSpacing: '-0.01em', lineHeight: 1.65, maxWidth: 440, marginBottom: 14 }}>
-              {project.tagline}
-            </p>
-
-            <p style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: 'var(--accent)', letterSpacing: '0.06em', fontWeight: 600 }}>
-              {project.subtitle}
-            </p>
           </div>
 
-          {/* Right: status panel */}
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 24px', minWidth: 200, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Phase */}
-            <div>
-              <Mono>PHASE</Mono>
-              <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-1)', marginTop: 4 }}>{project.currentPhase}</div>
-              <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 2 }}>{project.phaseLabel}</div>
-            </div>
-            <div style={{ height: 1, background: 'var(--border)' }} />
-            {/* Progress */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <Mono>PROGRESS</Mono>
-                <Mono color="var(--accent)">{project.progress}%</Mono>
-              </div>
-              <div style={{ height: 4, background: 'var(--surface-2)', borderRadius: 4, overflow: 'hidden' }}>
-                <div style={{ width: `${project.progress}%`, height: '100%', background: 'linear-gradient(to right, #E6B7C7, #6D9EEB)', borderRadius: 4, transition: 'width 1s ease' }} />
-              </div>
-            </div>
-            <div style={{ height: 1, background: 'var(--border)' }} />
-            {/* Status */}
-            <div>
-              <Mono>ACTIVE TASKS</Mono>
-              <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {cs.inProgress.map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.4 }}>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div style={{ height: 1, background: 'var(--border)' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Mono>UPDATED</Mono>
-              <Mono>{project.lastUpdated}</Mono>
-            </div>
-          </div>
-        </div>
+          <button
+            type="button"
+            aria-label="메뉴 열기"
+            className="lg:hidden w-11 h-11 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-white"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
 
-        {/* Core message */}
-        <div style={{ marginTop: 64, paddingTop: 36, borderTop: '1px solid var(--border)' }}>
-          <p style={{ fontSize: 'clamp(22px, 3.5vw, 38px)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.25, color: 'var(--text-1)' }}>
-            "장소가 아닌{' '}
-            <span style={{ background: 'linear-gradient(135deg, #E6B7C7, #C8698A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>코스</span>
-            를 공유한다."
-          </p>
-          <p style={{ marginTop: 8, fontSize: 13, color: 'var(--text-3)', fontStyle: 'italic' }}>{project.coreMessage && '— Route Core Thesis'}</p>
-        </div>
-
-        <div style={{ position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%)' }}>
-          <div style={{ width: 1, height: 36, background: 'linear-gradient(to bottom, var(--border-strong), transparent)' }} />
-        </div>
-      </div>
-
-      <Rule />
-
-      {/* ── VISION ── */}
-      <div id="vision">
-        <Section>
-          <Pad>
-            <Fade>
-              <SectionLabel>Project Vision</SectionLabel>
-              <BigTitle>왜 Route인가</BigTitle>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56 }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--red-dim)', border: '1px solid rgba(212,90,90,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>✕</div>
-                    <Mono color="var(--red)">PROBLEM</Mono>
-                  </div>
-                  <h3 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-1)', lineHeight: 1.25, marginBottom: 16 }}>{vis.problem.title}</h3>
-                  <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.85 }}>{vis.problem.desc}</p>
-                </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--green-dim)', border: '1px solid rgba(76,175,125,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>✓</div>
-                    <Mono color="var(--green)">SOLUTION</Mono>
-                  </div>
-                  <h3 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-1)', lineHeight: 1.25, marginBottom: 16 }}>{vis.solution.title}</h3>
-                  <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.85 }}>{vis.solution.desc}</p>
-                </div>
-              </div>
-            </Fade>
-          </Pad>
-        </Section>
-      </div>
-
-      <Rule />
-
-      {/* ── CURRENT STATUS — project log style ── */}
-      <div id="status">
-        <Section>
-          <Pad>
-            <Fade>
-              <SectionLabel>Current Status</SectionLabel>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginBottom: 40 }}>
-                <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, color: 'var(--text-1)' }}>
-                  {cs.phase}
-                </h2>
-              </div>
-
-              {/* Log layout */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                {/* Header */}
-                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto', gap: 16, padding: '10px 20px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
-                  <Mono>STATUS</Mono>
-                  <Mono>TASK</Mono>
-                  <Mono>TYPE</Mono>
-                </div>
-
-                {/* Completed rows */}
-                {cs.completed.map((item, i) => (
-                  <div key={`c-${i}`} style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto', gap: 16, padding: '13px 20px', borderBottom: '1px solid var(--border)', alignItems: 'center', background: 'transparent' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--green)', display: 'inline-block' }} />
-                      <Mono color="var(--green)">Done</Mono>
-                    </div>
-                    <span style={{ fontSize: 13, color: 'var(--text-3)', textDecoration: 'line-through', textDecorationColor: 'rgba(0,0,0,0.15)' }}>{item}</span>
-                    <Tag>완료</Tag>
-                  </div>
-                ))}
-
-                {/* In Progress rows — highlighted */}
-                {cs.inProgress.map((item, i) => (
-                  <div key={`ip-${i}`} style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto', gap: 16, padding: '14px 20px', borderBottom: '1px solid var(--border)', alignItems: 'center', background: 'rgba(200,105,138,0.03)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 0 3px rgba(200,105,138,0.2)', display: 'inline-block' }} />
-                      <Mono color="var(--accent)">Active</Mono>
-                    </div>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)' }}>{item}</span>
-                    <Tag color="var(--accent)">진행 중</Tag>
-                  </div>
-                ))}
-
-                {/* Next rows */}
-                {cs.next.map((item, i) => (
-                  <div key={`n-${i}`} style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto', gap: 16, padding: '13px 20px', borderBottom: i < cs.next.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'center', opacity: 0.6 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--text-3)', display: 'inline-block', border: '1.5px solid var(--text-3)', boxSizing: 'border-box', background: 'transparent' as any }} />
-                      <Mono>Backlog</Mono>
-                    </div>
-                    <span style={{ fontSize: 13, color: 'var(--text-2)' }}>{item}</span>
-                    <Tag>예정</Tag>
-                  </div>
-                ))}
-              </div>
-
-              {/* Summary strip */}
-              <div style={{ marginTop: 20, display: 'flex', gap: 16 }}>
-                {[
-                  { label: '완료', count: cs.completed.length, color: 'var(--green)' },
-                  { label: '진행 중', count: cs.inProgress.length, color: 'var(--accent)' },
-                  { label: '예정', count: cs.next.length, color: 'var(--text-3)' },
-                ].map(({ label, count, color }) => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 18, fontWeight: 800, color, fontVariantNumeric: 'tabular-nums' }}>{count}</span>
-                    <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{label}</span>
-                  </div>
-                ))}
-              </div>
-            </Fade>
-          </Pad>
-        </Section>
-      </div>
-
-      <Rule />
-
-      {/* ── FEATURES ── */}
-      <div id="features">
-        <Section>
-          <Pad>
-            <Fade>
-              <SectionLabel>Core Features</SectionLabel>
-              <BigTitle>{feats.length}가지 핵심 기능</BigTitle>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {feats.map((f, i) => (
-                  <div key={f.num} style={{ display: 'grid', gridTemplateColumns: '48px 1fr 1fr', gap: 28, padding: '24px 0', borderTop: '1px solid var(--border)', borderBottom: i === feats.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'start' }}>
-                    <Mono>{f.num}</Mono>
-                    <div>
-                      <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-1)', marginBottom: 6 }}>{f.title}</div>
-                      <Tag color="var(--accent)">{f.ko}</Tag>
-                    </div>
-                    <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.75, paddingTop: 2 }}>{f.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </Fade>
-          </Pad>
-        </Section>
-      </div>
-
-      <Rule />
-
-      {/* ── UX FLOW ── */}
-      <Section>
-        <Pad>
-          <Fade>
-            <SectionLabel>User Experience Flow</SectionLabel>
-            <BigTitle>사용자 여정</BigTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: 28, left: '12.5%', right: '12.5%', height: 1, background: 'linear-gradient(to right, var(--accent), var(--blue))' }} />
-              {FLOW.map((step, i) => (
-                <div key={step} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-                  <div style={{ width: 56, height: 56, borderRadius: '50%', background: i === 0 ? 'linear-gradient(135deg, #E6B7C7, #C8698A)' : 'var(--surface)', border: `1px solid ${i === 0 ? 'transparent' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: i === 0 ? 'white' : 'var(--text-3)', fontFamily: "'JetBrains Mono', monospace", position: 'relative', zIndex: 1, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                    {String(i + 1).padStart(2, '0')}
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.02em', marginBottom: 3 }}>{step}</div>
-                    <div style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: 'var(--accent)', marginBottom: 8, fontWeight: 600 }}>{FLOW_KO[i]}</div>
-                    <div style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.55 }}>{FLOW_DESC[i]}</div>
-                  </div>
-                </div>
+          {menuOpen && (
+            <div className="absolute top-20 left-4 right-4 lg:hidden rounded-3xl bg-[#121216]/95 border border-white/15 shadow-2xl backdrop-blur-2xl p-4 space-y-2 z-50">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => { setActiveTab(tab.id); setMenuOpen(false); }}
+                  className={`w-full text-left px-5 py-3 rounded-2xl text-sm font-semibold transition-all ${activeTab === tab.id ? 'bg-[#E6B7C7] text-[#111111]' : 'text-zinc-300 hover:bg-white/5'}`}
+                >
+                  {tab.label}
+                </button>
               ))}
+              <a
+                href="https://github.com/yeongjunsong92-byte/Route-app-claud"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 px-5 py-3 rounded-2xl text-sm font-semibold text-white bg-white/10 hover:bg-white/15"
+              >
+                <GitBranch className="w-4 h-4 text-[#E6B7C7]" />
+                <span>GitHub Repository</span>
+              </a>
             </div>
-          </Fade>
-        </Pad>
-      </Section>
-
-      <Rule />
-
-      {/* ── DESIGN SYSTEM — brand doc style ── */}
-      <div id="design">
-        <Section>
-          <Pad>
-            <Fade>
-              <SectionLabel>Design System</SectionLabel>
-              <BigTitle>브랜드 & 디자인 원칙</BigTitle>
-
-              {/* Design Principles — featured */}
-              <div style={{ marginBottom: 52 }}>
-                <Mono>DESIGN PRINCIPLES</Mono>
-                <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-                  {ds.principles.map((p, i) => (
-                    <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 18px', position: 'relative', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                      <div style={{ position: 'absolute', top: 14, right: 16, fontFamily: "'JetBrains Mono', monospace", fontSize: 28, fontWeight: 800, color: 'var(--accent)', opacity: 0.08, lineHeight: 1 }}>
-                        {String(i + 1).padStart(2, '0')}
-                      </div>
-                      <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--accent)', letterSpacing: '-0.02em', marginBottom: 10 }}>{p.title}</div>
-                      <p style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.7 }}>{p.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Color system */}
-              <div style={{ marginBottom: 44 }}>
-                <Mono>COLOR SYSTEM</Mono>
-                <div style={{ marginTop: 16, display: 'flex', gap: 10 }}>
-                  {ds.colors.map(c => (
-                    <div key={c.name} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div style={{ height: 72, borderRadius: 12, background: c.hex, border: '1px solid var(--border)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }} />
-                      <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: 'var(--text-3)' }}>{c.hex}</div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)' }}>{c.label}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{c.name}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
-                {/* Typography */}
-                <div>
-                  <Mono>TYPOGRAPHY</Mono>
-                  <div style={{ marginTop: 16, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '20px 18px' }}>
-                    <div style={{ fontSize: 36, fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--text-1)', lineHeight: 1 }}>Aa</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', marginTop: 10 }}>{ds.typography}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 3 }}>Korean + Latin variable font</div>
-                    <div style={{ marginTop: 14, height: 1, background: 'var(--border)' }} />
-                    <div style={{ marginTop: 12, fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--text-3)' }}>JetBrains Mono / monospace</div>
-                  </div>
-                </div>
-                {/* Brand keywords */}
-                <div>
-                  <Mono>BRAND KEYWORDS</Mono>
-                  <div style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {ds.brandKeywords.map(k => (
-                      <span key={k} style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent)', background: 'var(--accent-soft)', borderRadius: 8, padding: '8px 16px' }}>{k}</span>
-                    ))}
-                  </div>
-                  <Mono style={{ display: 'block', marginTop: 24 }}>DESIGN REFERENCES</Mono>
-                  <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {ds.designReferences.map(r => (
-                      <span key={r} style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 7, padding: '5px 13px' }}>{r}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Fade>
-          </Pad>
-        </Section>
-      </div>
-
-      <Rule />
-
-      {/* ── TECH ── */}
-      <div id="tech">
-        <Section>
-          <Pad>
-            <Fade>
-              <SectionLabel>Technical Architecture</SectionLabel>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, alignItems: 'start' }}>
-                <div>
-                  <BigTitle>검증된 기술 스택</BigTitle>
-                  <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.85 }}>확장성과 개발 속도를 모두 잡기 위해 React Native와 Firebase를 선택했습니다. 단일 코드베이스로 iOS와 Android를 동시에 지원합니다.</p>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                  {stack.map((s, i) => (
-                    <div key={s.layer} style={{ display: 'grid', gridTemplateColumns: '90px 1fr auto', alignItems: 'center', gap: 16, padding: '14px 20px', borderBottom: i < stack.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                      <Mono>{s.layer}</Mono>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)' }}>{s.value}</span>
-                      <Tag>{s.note}</Tag>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Fade>
-          </Pad>
-        </Section>
-      </div>
-
-      <Rule />
-
-      {/* ── TEAM ── */}
-      <div id="team">
-        <Section>
-          <Pad>
-            <Fade>
-              <SectionLabel>AI Team</SectionLabel>
-              <BigTitle>AI가 팀을 이룹니다</BigTitle>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18 }}>
-                {agents.map(agent => (
-                  <div key={agent.name} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '26px 22px', display: 'flex', flexDirection: 'column', gap: 18, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s' }}
-                    onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)'}
-                    onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'}>
-                    <div style={{ width: 42, height: 42, borderRadius: 10, background: agent.color + '18', border: `1px solid ${agent.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: agent.color }}>{agent.icon}</div>
-                    <div>
-                      <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-1)', marginBottom: 3 }}>{agent.name}</div>
-                      <div style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: agent.color, fontWeight: 600, marginBottom: 14 }}>{agent.role}</div>
-                      <div style={{ height: 1, background: 'var(--border)', marginBottom: 12 }} />
-                      <p style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.65 }}>{agent.ko}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Fade>
-          </Pad>
-        </Section>
-      </div>
-
-      <Rule />
-
-      {/* ── DECISION LOG — table style ── */}
-      <Section>
-        <Pad>
-          <Fade>
-            <SectionLabel>Decision Log</SectionLabel>
-            <BigTitle>주요 의사결정</BigTitle>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-              {/* Table header */}
-              <div style={{ display: 'grid', gridTemplateColumns: '80px 220px 1fr', gap: 24, padding: '10px 24px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
-                <Mono>DATE</Mono>
-                <Mono>DECISION</Mono>
-                <Mono>REASON</Mono>
-              </div>
-              {/* Table rows */}
-              {decisionLog.map((d, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '80px 220px 1fr', gap: 24, padding: '18px 24px', borderBottom: i < decisionLog.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'start', transition: 'background 0.15s' }}
-                  onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = 'var(--surface-2)'}
-                  onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = 'transparent'}>
-                  <Mono>{d.date}</Mono>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.02em', lineHeight: 1.4 }}>{d.title}</div>
-                  <p style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.75 }}>{d.reason}</p>
-                </div>
-              ))}
-            </div>
-          </Fade>
-        </Pad>
-      </Section>
-
-      <Rule />
-
-      {/* ── ROADMAP — timeline style ── */}
-      <div id="roadmap">
-        <Section>
-          <Pad>
-            <Fade>
-              <SectionLabel>Roadmap</SectionLabel>
-              <BigTitle>개발 로드맵</BigTitle>
-
-              {/* Horizontal timeline */}
-              <div style={{ position: 'relative', paddingBottom: 48 }}>
-                {/* Track line */}
-                <div style={{ position: 'absolute', top: 20, left: 0, right: 0, height: 2, background: 'var(--border)', borderRadius: 2 }} />
-                {/* Active progress */}
-                <div style={{ position: 'absolute', top: 20, left: 0, width: `${(1 / rm.length) * 100}%`, height: 2, background: 'linear-gradient(to right, #E6B7C7, #C8698A)', borderRadius: 2 }} />
-
-                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${rm.length}, 1fr)`, position: 'relative' }}>
-                  {rm.map((r) => {
-                    const isActive = r.status === 'active'
-                    const isNext = r.status === 'next'
-                    const isDone = r.status === 'done'
-                    return (
-                      <div key={r.phase} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, paddingTop: 0 }}>
-                        {/* Node */}
-                        <div style={{
-                          width: isActive ? 40 : 32, height: isActive ? 40 : 32,
-                          borderRadius: '50%',
-                          background: isActive ? 'linear-gradient(135deg, #E6B7C7, #C8698A)' : isDone ? 'var(--green)' : 'var(--surface)',
-                          border: `2px solid ${isActive ? 'transparent' : isNext ? 'var(--amber)' : 'var(--border)'}`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          position: 'relative', zIndex: 1,
-                          boxShadow: isActive ? '0 0 0 6px rgba(200,105,138,0.15), 0 2px 12px rgba(200,105,138,0.3)' : '0 2px 6px rgba(0,0,0,0.08)',
-                          transition: 'all 0.3s',
-                          marginTop: isActive ? -4 : 0,
-                        }}>
-                          <span style={{ fontSize: 10, fontWeight: 700, color: isActive ? 'white' : isNext ? 'var(--amber)' : 'var(--text-3)', fontFamily: "'JetBrains Mono', monospace" }}>
-                            {r.phase}
-                          </span>
-                        </div>
-                        {/* Label */}
-                        <div style={{ textAlign: 'center', paddingTop: 6 }}>
-                          <div style={{ fontSize: 12, fontWeight: isActive ? 800 : 500, color: isActive ? 'var(--text-1)' : 'var(--text-3)', letterSpacing: '-0.01em', marginBottom: 4, lineHeight: 1.3 }}>{r.label}</div>
-                          {isActive && (
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--accent-dim)', borderRadius: 6, padding: '2px 7px' }}>
-                              <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
-                              <Mono color="var(--accent)">NOW</Mono>
-                            </div>
-                          )}
-                          {isNext && (
-                            <Mono color="var(--amber)">Next</Mono>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </Fade>
-          </Pad>
-        </Section>
-      </div>
-
-      <Rule />
-
-      {/* ── FUTURE VISION — AI focused ── */}
-      <div id="future">
-        <Section>
-          <Pad>
-            <Fade>
-              <SectionLabel>Future Vision</SectionLabel>
-              <BigTitle>Route의 미래</BigTitle>
-
-              {/* Featured vision item */}
-              <div style={{ background: 'linear-gradient(135deg, rgba(200,105,138,0.06) 0%, rgba(109,158,235,0.06) 100%)', border: '1px solid rgba(200,105,138,0.2)', borderRadius: 18, padding: '32px 32px', marginBottom: 20, display: 'grid', gridTemplateColumns: '1fr auto', gap: 32, alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: 'var(--accent)', letterSpacing: '0.12em', fontWeight: 700, marginBottom: 12 }}>CORE VISION</div>
-                  <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--text-1)', marginBottom: 12, lineHeight: 1.2 }}>AI Travel Assistant</div>
-                  <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.8, maxWidth: 440 }}>
-                    사용자의 취향과 이동 패턴을 학습하고, 대화형 AI로 최적의 여행 코스를 자동 생성합니다. Route는 단순한 지도 앱을 넘어 개인 여행 비서로 진화합니다.
-                  </p>
-                  <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {['개인화 추천', '자동 일정 생성', '대화형 계획', '취향 학습'].map(tag => (
-                      <Tag key={tag} color="var(--accent)">{tag}</Tag>
-                    ))}
-                  </div>
-                </div>
-                <div style={{ fontSize: 72, opacity: 0.15, lineHeight: 1 }}>✦</div>
-              </div>
-
-              {/* Sub-visions */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-                {futureVision.slice(1).map((f, i) => (
-                  <div key={f.num} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 20px', display: 'flex', flexDirection: 'column', gap: 10, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', transition: 'all 0.2s' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(200,105,138,0.1)'; (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(200,105,138,0.25)' }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'; (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)' }}>
-                    <Mono color="var(--accent)">{f.num}</Mono>
-                    <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-1)', lineHeight: 1.3 }}>{f.title}</div>
-                    <p style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.7 }}>{f.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </Fade>
-          </Pad>
-        </Section>
-      </div>
-
-      {/* ── FOOTER ── */}
-      <footer style={{ borderTop: '1px solid var(--border)', padding: '28px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 900, margin: '0 auto', width: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 18, height: 18, borderRadius: 4, background: 'linear-gradient(135deg, #E6B7C7, #6D9EEB)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 9L6 3L10 9" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </div>
-          <span style={{ fontWeight: 800, fontSize: 13, letterSpacing: '-0.02em' }}>{project.name}</span>
-          <span style={{ fontSize: 12, color: 'var(--text-3)', marginLeft: 4 }}>Project HQ</span>
+          )}
         </div>
-        <Mono>{project.lastUpdated} · Every Course, Every Memory.</Mono>
+      </header>
+
+      {/* Main Content Area */}
+      {activeTab === 'overview' && (
+        <main className="max-w-7xl mx-auto px-6 py-16 space-y-20 relative z-10">
+          {/* Apple-style Hero Banner */}
+          <div className="relative rounded-[40px] bg-gradient-to-b from-[#18181C] to-[#111115] border border-white/10 p-10 md:p-20 shadow-2xl overflow-hidden text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-12">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-[#E6B7C7]/15 to-[#6D9EEB]/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+            <div className="space-y-8 max-w-2xl relative z-10">
+              <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#E6B7C7]/15 border border-[#E6B7C7]/30 text-[#E6B7C7] text-xs font-mono font-semibold tracking-wider uppercase">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Route MVP Portfolio & Bootcamp HQ</span>
+              </div>
+              <h1 className="text-4xl md:text-7xl font-black tracking-tight text-white leading-[1.08]">
+                "장소가 아닌 <span className="bg-gradient-to-r from-[#E6B7C7] to-[#D49EB1] bg-clip-text text-transparent">코스</span>를 공유한다."
+              </h1>
+              <p className="text-zinc-400 text-lg md:text-xl font-normal leading-relaxed">
+                Route는 사용자가 자신의 여행 경로를 직접 설계하고, 지도 위에서 실제 이동 경험을 나누는 차세대 위치 기반 여행 플랫폼입니다. 복잡한 SNS를 넘어 완벽히 작동하는 웹 MVP 서비스를 구축했습니다.
+              </p>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
+                <button 
+                  onClick={() => setActiveTab('vision')} 
+                  className="px-8 py-4 rounded-full bg-white text-[#111111] font-bold text-sm hover:bg-[#E6B7C7] shadow-xl transition-all duration-300 flex items-center space-x-2 cursor-pointer hover:scale-105"
+                >
+                  <span>제품 비전 살펴보기</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => setActiveTab('journey')} 
+                  className="px-8 py-4 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-sm backdrop-blur-md transition-all duration-300 cursor-pointer hover:scale-105"
+                >
+                  개발 여정 (Journey)
+                </button>
+              </div>
+            </div>
+
+            <div className="relative z-10 w-full md:w-auto flex-shrink-0">
+              <div className="w-72 h-72 md:w-80 md:h-80 rounded-[32px] bg-gradient-to-br from-white/10 to-white/5 border border-white/15 backdrop-blur-2xl p-8 flex flex-col justify-between shadow-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-[#E6B7C7]/20 flex items-center justify-center text-[#E6B7C7]">
+                    <Compass className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Active MVP</span>
+                </div>
+                <div className="space-y-2 text-left">
+                  <p className="text-xs font-mono text-zinc-400 uppercase tracking-wider">Core Philosophy</p>
+                  <p className="text-xl font-bold text-white">Every Course,<br />Every Memory.</p>
+                </div>
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
+                  <span>React 19 / Vite</span>
+                  <span>Firebase / Maps</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Problem & Solution Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-6 shadow-xl relative overflow-hidden group hover:border-red-500/30 transition-all">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/15 transition-all"></div>
+              <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center text-xl font-black">
+                ✕
+              </div>
+              <h3 className="text-2xl font-bold text-white">기존 여행 계획의 한계 (Problem)</h3>
+              <p className="text-zinc-400 leading-relaxed text-base">
+                지도 앱, 블로그, SNS를 번갈아 가며 정보를 수집하고 텍스트로 정리하지만, 현장에 도착하면 동선이 끊기고 실제 경험은 기록되지 않습니다. 단편적인 장소 추천만으로는 생생한 여행 코스를 재현하기 어렵습니다.
+              </p>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-6 shadow-xl relative overflow-hidden group hover:border-emerald-500/30 transition-all">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/15 transition-all"></div>
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-black">
+                ✓
+              </div>
+              <h3 className="text-2xl font-bold text-white">Route의 통합 솔루션 (Solution)</h3>
+              <p className="text-zinc-400 leading-relaxed text-base">
+                검색, 지도, 코스 생성, SNS 공유, 실시간 내비게이션까지 하나의 플랫폼에 통합했습니다. 사용자는 다른 사람의 코스를 그대로 가져와 완주하고, 자신만의 독창적인 여행 루트를 세상에 공유할 수 있습니다.
+              </p>
+            </div>
+          </div>
+
+          {/* Key Metrics Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="rounded-[28px] bg-[#121216] border border-white/10 p-8 space-y-2 text-center shadow-lg">
+              <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Target Platform</p>
+              <p className="text-3xl font-extrabold text-white">Web MVP</p>
+              <p className="text-xs text-zinc-400">React + Vite 즉시 접속</p>
+            </div>
+            <div className="rounded-[28px] bg-[#121216] border border-white/10 p-8 space-y-2 text-center shadow-lg">
+              <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Core Engine</p>
+              <p className="text-3xl font-extrabold text-[#E6B7C7]">Google Maps</p>
+              <p className="text-xs text-zinc-400">Places & Directions API</p>
+            </div>
+            <div className="rounded-[28px] bg-[#121216] border border-white/10 p-8 space-y-2 text-center shadow-lg">
+              <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Backend DB</p>
+              <p className="text-3xl font-extrabold text-[#6D9EEB]">Firebase</p>
+              <p className="text-xs text-zinc-400">Auth, Firestore, Storage</p>
+            </div>
+            <div className="rounded-[28px] bg-[#121216] border border-white/10 p-8 space-y-2 text-center shadow-lg">
+              <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest">Collaboration</p>
+              <p className="text-3xl font-extrabold text-white">AI-Driven</p>
+              <p className="text-xs text-zinc-400">Claude + ChatGPT + Manus</p>
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* Product Vision Tab */}
+      {activeTab === 'vision' && (
+        <main className="max-w-7xl mx-auto px-6 py-16 space-y-16 relative z-10">
+          <div className="text-center max-w-3xl mx-auto space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Product Vision</h2>
+            <p className="text-zinc-400 text-lg">사용자가 여행을 발견하고, 설계하고, 이동하는 모든 여정을 관통하는 4가지 핵심 기능입니다.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-6 shadow-xl hover:border-[#6D9EEB]/40 transition-all group">
+              <div className="w-16 h-16 rounded-2xl bg-[#6D9EEB]/10 border border-[#6D9EEB]/20 text-[#6D9EEB] flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Compass className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-bold text-white">01. 지도 기반 장소 탐색 (Map Exploration)</h3>
+              <p className="text-zinc-400 leading-relaxed text-base">
+                지도 위에서 주변의 인기 장소를 발견하고, 다른 여행자들이 공유한 생생한 코스를 시각적으로 탐색합니다. 카테고리별 필터를 통해 원하는 취향의 명소를 한눈에 찾을 수 있습니다.
+              </p>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-6 shadow-xl hover:border-[#E6B7C7]/40 transition-all group">
+              <div className="w-16 h-16 rounded-2xl bg-[#E6B7C7]/10 border border-[#E6B7C7]/20 text-[#E6B7C7] flex items-center justify-center group-hover:scale-110 transition-transform">
+                <RouteIcon className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-bold text-white">02. 나만의 코스 제작 (Course Creation)</h3>
+              <p className="text-zinc-400 leading-relaxed text-base">
+                방문할 장소들을 날짜(DAY)별로 선택하고 순서를 직관적으로 배치하여 나만의 여행 및 데이트 코스를 직접 설계합니다. 코스 저장 시 실시간으로 데이터베이스에 안전하게 반영됩니다.
+              </p>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-6 shadow-xl hover:border-purple-500/40 transition-all group">
+              <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Users className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-bold text-white">03. 코스 기반 SNS 공유 (Route SNS)</h3>
+              <p className="text-zinc-400 leading-relaxed text-base">
+                단순한 사진 낱장이 아닌, 완성된 동선과 지도 경로가 포함된 코스를 커뮤니티 피드에 공유합니다. 좋아요와 댓글, 팔로우 기능을 통해 다른 사용자들과 여행 경험을 나눕니다.
+              </p>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-6 shadow-xl hover:border-amber-500/40 transition-all group">
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Navigation className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-bold text-white">04. 실시간 지도 따라가기 (Travel Navigator)</h3>
+              <p className="text-zinc-400 leading-relaxed text-base">
+                작성된 코스를 바탕으로 실제 현장에서 실시간 GPS 추적과 경로 안내를 받으며 여행을 완주할 수 있습니다. 완주 후에는 자동으로 여행 기록(Travel Log)이 생성됩니다.
+              </p>
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* Development Journey Tab */}
+      {activeTab === 'journey' && (
+        <main className="max-w-5xl mx-auto px-6 py-16 space-y-16 relative z-10">
+          <div className="text-center max-w-3xl mx-auto space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Development Journey</h2>
+            <p className="text-zinc-400 text-lg">아이디어 구상부터 웹 서비스 배포까지, 부트캠프 형식으로 체계적으로 진행된 5단계 개발 로드맵입니다.</p>
+          </div>
+
+          <div className="space-y-6">
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
+              <div className="space-y-3">
+                <span className="px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-semibold">Completed</span>
+                <h3 className="text-2xl font-bold text-white">Phase 1: 아이디어 및 브랜드 설계</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">핵심 가치 정의, 브랜드 아이덴티티(Route) 수립, 디자인 시스템 및 컬러 팔레트 확정.</p>
+              </div>
+              <div className="text-sm font-mono text-zinc-500 bg-white/5 px-4 py-2 rounded-xl border border-white/10 self-start md:self-center">Week 1–2</div>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
+              <div className="space-y-3">
+                <span className="px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-semibold">Completed</span>
+                <h3 className="text-2xl font-bold text-white">Phase 2: 프로토타입 제작 및 화면 아키텍처</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">React + Vite 기반 화면 구조 설계, 주요 컴포넌트 목업 및 네비게이션 흐름 정의.</p>
+              </div>
+              <div className="text-sm font-mono text-zinc-500 bg-white/5 px-4 py-2 rounded-xl border border-white/10 self-start md:self-center">Week 3–4</div>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
+              <div className="space-y-3">
+                <span className="px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-semibold">Completed</span>
+                <h3 className="text-2xl font-bold text-white">Phase 3: Firebase 및 Google Maps API 연동</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">Firebase Authentication 회원가입/로그인, Firestore 데이터 스키마 구축, Google Maps 장소 검색 및 마커 연동.</p>
+              </div>
+              <div className="text-sm font-mono text-zinc-500 bg-white/5 px-4 py-2 rounded-xl border border-white/10 self-start md:self-center">Week 5–6</div>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-[#E6B7C7]/40 p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-[#E6B7C7]/10 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="space-y-3 relative z-10">
+                <span className="px-3.5 py-1 rounded-full bg-[#E6B7C7]/20 border border-[#E6B7C7]/30 text-[#E6B7C7] text-xs font-mono font-semibold">In Progress</span>
+                <h3 className="text-2xl font-bold text-white">Phase 4: MVP 핵심 기능 고도화</h3>
+                <p className="text-zinc-300 text-sm leading-relaxed">CreateScreen 코스 생성 UX 완성, MyCourse 저장된 코스 관리, Course Detail 상세 보기 리디자인.</p>
+              </div>
+              <div className="text-sm font-mono text-[#E6B7C7] bg-[#E6B7C7]/10 px-4 py-2 rounded-xl border border-[#E6B7C7]/20 self-start md:self-center relative z-10">Current Stage</div>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
+              <div className="space-y-3">
+                <span className="px-3.5 py-1 rounded-full bg-zinc-500/10 border border-zinc-500/20 text-zinc-400 text-xs font-mono font-semibold">Upcoming</span>
+                <h3 className="text-2xl font-bold text-white">Phase 5: 웹 서비스 공개 및 QA</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">Vercel 배포, 반응형 UI 최종 검수, 사용자 피드백 반영 및 AI 추천 기능 연동.</p>
+              </div>
+              <div className="text-sm font-mono text-zinc-500 bg-white/5 px-4 py-2 rounded-xl border border-white/10 self-start md:self-center">Week 8+</div>
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* Tech Stack Tab */}
+      {activeTab === 'tech' && (
+        <main className="max-w-7xl mx-auto px-6 py-16 space-y-16 relative z-10">
+          <div className="text-center max-w-3xl mx-auto space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Tech Stack</h2>
+            <p className="text-zinc-400 text-lg">안정성과 확장성을 고려하여 엄선한 모던 웹 기술 스택입니다.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-6 shadow-xl">
+              <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                <Globe className="w-7 h-7" />
+              </div>
+              <h3 className="text-2xl font-bold text-white">Frontend</h3>
+              <ul className="space-y-3 text-sm text-zinc-300">
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>React 19 & TypeScript</span></li>
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Vite 울트라 패스트 빌드</span></li>
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Tailwind CSS v4 스타일링</span></li>
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Lucide React 아이콘</span></li>
+              </ul>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-6 shadow-xl">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                <Cpu className="w-7 h-7" />
+              </div>
+              <h3 className="text-2xl font-bold text-white">Backend & DB</h3>
+              <ul className="space-y-3 text-sm text-zinc-300">
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Firebase Authentication</span></li>
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Cloud Firestore NoSQL DB</span></li>
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Firebase Storage</span></li>
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Cloud Functions (AI 추천)</span></li>
+              </ul>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-6 shadow-xl">
+              <div className="w-14 h-14 rounded-2xl bg-[#E6B7C7]/10 border border-[#E6B7C7]/20 text-[#E6B7C7] flex items-center justify-center">
+                <MapPin className="w-7 h-7" />
+              </div>
+              <h3 className="text-2xl font-bold text-white">APIs & Tools</h3>
+              <ul className="space-y-3 text-sm text-zinc-300">
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Google Maps JavaScript API</span></li>
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Google Places & Directions API</span></li>
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Git & GitHub Version Control</span></li>
+                <li className="flex items-center space-x-3"><CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" /><span>Vercel Deployment Pipeline</span></li>
+              </ul>
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* AI Collaboration Tab */}
+      {activeTab === 'ai' && (
+        <main className="max-w-7xl mx-auto px-6 py-16 space-y-16 relative z-10">
+          <div className="text-center max-w-3xl mx-auto space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">AI Collaboration Team</h2>
+            <p className="text-zinc-400 text-lg">AI 모델들과의 유기적인 협업 파이프라인으로 기획부터 개발, 검증까지 완벽하게 수행합니다.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-8 space-y-6 shadow-xl text-center">
+              <div className="w-16 h-16 rounded-3xl bg-blue-500/10 border border-blue-500/20 text-blue-400 mx-auto flex items-center justify-center font-black text-xl">
+                GPT
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-xl text-white">ChatGPT</h3>
+                <p className="text-xs font-mono text-blue-400 uppercase tracking-widest">Product Manager</p>
+              </div>
+              <p className="text-sm text-zinc-400 leading-relaxed">서비스 방향 결정, 기능 기획 및 우선순위 수립, PRD 작성 총괄.</p>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-8 space-y-6 shadow-xl text-center">
+              <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center font-black text-xl">
+                CLD
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-xl text-white">Claude</h3>
+                <p className="text-xs font-mono text-emerald-400 uppercase tracking-widest">Lead Developer</p>
+              </div>
+              <p className="text-sm text-zinc-400 leading-relaxed">React 및 Firebase 아키텍처 구현, 코드 리팩토링 및 기능 개발.</p>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-8 space-y-6 shadow-xl text-center">
+              <div className="w-16 h-16 rounded-3xl bg-purple-500/10 border border-purple-500/20 text-purple-400 mx-auto flex items-center justify-center font-black text-xl">
+                GEM
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-xl text-white">Gemini</h3>
+                <p className="text-xs font-mono text-purple-400 uppercase tracking-widest">QA Engineer</p>
+              </div>
+              <p className="text-sm text-zinc-400 leading-relaxed">UI 검수, 기능 테스트, 엣지 케이스 및 버그 리포트 작성.</p>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-8 space-y-6 shadow-xl text-center">
+              <div className="w-16 h-16 rounded-3xl bg-[#E6B7C7]/10 border border-[#E6B7C7]/20 text-[#E6B7C7] mx-auto flex items-center justify-center font-black text-xl">
+                MAN
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-xl text-white">Manus AI</h3>
+                <p className="text-xs font-mono text-[#E6B7C7] uppercase tracking-widest">Autonomous Agent</p>
+              </div>
+              <p className="text-sm text-zinc-400 leading-relaxed">자율 실행 에이전트로서 전체 프로젝트 조율, 배포 및 통합 관리.</p>
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* Design System Tab */}
+      {activeTab === 'design' && (
+        <main className="max-w-7xl mx-auto px-6 py-16 space-y-16 relative z-10">
+          <div className="text-center max-w-3xl mx-auto space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Design System</h2>
+            <p className="text-zinc-400 text-lg">Apple 스타일의 깊이감과 모던한 감성을 담아낸 Route만의 디자인 철학입니다.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-8 shadow-xl">
+              <h3 className="text-2xl font-bold text-white">Color Palette</h3>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="w-12 h-12 rounded-2xl bg-[#050507] border border-white/20"></div>
+                  <div>
+                    <p className="font-bold text-white text-sm">Dark Background</p>
+                    <p className="text-xs font-mono text-zinc-400">#050507 (Apple OLED Black)</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="w-12 h-12 rounded-2xl bg-[#E6B7C7]"></div>
+                  <div>
+                    <p className="font-bold text-white text-sm">Primary Pink Accent</p>
+                    <p className="text-xs font-mono text-zinc-400">#E6B7C7 (Route Signature Pink)</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="w-12 h-12 rounded-2xl bg-[#6D9EEB]"></div>
+                  <div>
+                    <p className="font-bold text-white text-sm">Secondary Blue Accent</p>
+                    <p className="text-xs font-mono text-zinc-400">#6D9EEB (Map & Navigation Blue)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-[32px] bg-[#121216] border border-white/10 p-10 space-y-8 shadow-xl">
+              <h3 className="text-2xl font-bold text-white">Design Principles</h3>
+              <ul className="space-y-6 text-sm text-zinc-300">
+                <li className="space-y-1">
+                  <p className="font-bold text-white text-base">01. Immersive Glassmorphism</p>
+                  <p className="text-zinc-400">반투명 블러 효과와 미세한 보더 라인을 활용하여 입체감 있는 UI 구현.</p>
+                </li>
+                <li className="space-y-1">
+                  <p className="font-bold text-white text-base">02. Card-Centric Architecture</p>
+                  <p className="text-zinc-400">정보의 가독성을 극대화하는 넉넉한 여백과 둥근 모서리(Rounded-3xl).</p>
+                </li>
+                <li className="space-y-1">
+                  <p className="font-bold text-white text-base">03. High Contrast & Legibility</p>
+                  <p className="text-zinc-400">어두운 배경 위에서 돋보이는 맑은 화이트 텍스트와 감각적인 포인트 컬러.</p>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* Footer */}
+      <footer className="max-w-7xl mx-auto px-6 py-16 border-t border-white/10 mt-28 text-center text-sm text-zinc-500 space-y-3 relative z-10">
+        <p className="text-zinc-400 font-medium">© 2026 Route Project Bootcamp HQ. All rights reserved.</p>
+        <p className="font-mono text-xs text-zinc-600">Every Course, Every Memory. Built with React, Vite & Tailwind CSS.</p>
       </footer>
     </div>
-  )
+  );
 }
