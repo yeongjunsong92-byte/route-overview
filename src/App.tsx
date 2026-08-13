@@ -213,6 +213,94 @@ function RoutePreview() {
   )
 }
 
+function ProblemVisualizer() {
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const [focus, setFocus] = useState<string | null>(null)
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const x = ((event.clientX - rect.left) / rect.width - 0.5) * 2
+    const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2
+    setTilt({ x, y })
+  }
+
+  const resetTilt = () => {
+    setTilt({ x: 0, y: 0 })
+    setFocus(null)
+  }
+
+  const sourceCards = [
+    { id: "restaurant", className: "source-restaurant", icon: Search, type: "BLOG / SEARCH", title: "맛집 저장", meta: "브런치 카페 링크" },
+    { id: "place", className: "source-place", icon: MapPin, type: "SOCIAL / MAP", title: "장소 저장", meta: "가고 싶은 전시" },
+    { id: "stay", className: "source-stay", icon: CalendarDays, type: "BOOKING APP", title: "숙소 저장", meta: "체크인 15:00" },
+    { id: "memo", className: "source-memo", icon: Layers3, type: "MEMO / CHAT", title: "메모 정리", meta: "링크를 다시 찾기" },
+  ]
+
+  return (
+    <div className="problem-stage-wrap">
+      <div
+        className="problem-stage-shell"
+        style={{ transform: `perspective(1400px) rotateX(${tilt.y * -3.2}deg) rotateY(${tilt.x * 4.5}deg)` }}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={resetTilt}
+        onFocus={() => undefined}
+      >
+        <div className="problem-stage-top">
+          <div>
+            <span className="section-kicker"><span className="kicker-line" /> PROBLEM IN MOTION</span>
+            <h3>정보는 모이는데,<br /><em>경험은 이어지지 않는다.</em></h3>
+          </div>
+          <div className="stage-status"><span className="stage-dot" /> BEFORE ROUTE</div>
+        </div>
+        <div className="problem-stage-canvas" aria-label="여러 서비스에 흩어진 여행 정보를 보여주는 애니메이션">
+          <div className="stage-grid" />
+          <div className="stage-glow stage-glow-pink" />
+          <div className="stage-glow stage-glow-blue" />
+          <div className="stage-ring ring-a" />
+          <div className="stage-ring ring-b" />
+          <div className="stage-path path-a" />
+          <div className="stage-path path-b" />
+          <div className="stage-path path-c" />
+          <div className="stage-fragment fragment-a">LINK</div>
+          <div className="stage-fragment fragment-b">SAVE</div>
+          <div className="stage-fragment fragment-c">COPY</div>
+          {sourceCards.map((card) => {
+            const Icon = card.icon
+            return (
+              <button
+                type="button"
+                key={card.id}
+                className={`source-card ${card.className} ${focus === card.id ? "is-focused" : ""}`}
+                onMouseEnter={() => setFocus(card.id)}
+                onFocus={() => setFocus(card.id)}
+                onMouseLeave={() => setFocus(null)}
+                onBlur={() => setFocus(null)}
+                aria-label={`${card.title}, ${card.meta}`}
+              >
+                <span className="source-card-top"><span className="source-card-icon"><Icon size={14} /></span><span className="source-card-type">{card.type}</span></span>
+                <strong>{card.title}</strong>
+                <small>{card.meta}</small>
+                <span className="source-card-lines"><i /><i /><i /></span>
+              </button>
+            )
+          })}
+          <div className="stage-core">
+            <div className="core-pulse"><RouteIcon size={21} /></div>
+            <span className="core-label">0 CONNECTED</span>
+            <strong>여행 계획</strong>
+            <small>다시 조합해야 하는 상태</small>
+          </div>
+          <div className="stage-center-note"><span /> different apps</div>
+        </div>
+        <div className="problem-stage-bottom">
+          <div className="fragment-sequence"><span>SEARCH</span><i /><span>SAVE</span><i /><span>REBUILD</span></div>
+          <span className="stage-hint">hover to inspect the fragments</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [activeSection, setActiveSection] = useState<SectionId>("overview")
   const [menuOpen, setMenuOpen] = useState(false)
@@ -405,6 +493,7 @@ function App() {
               이동 경로와 하루의 리듬을 다시 직접 조합해야 하는 불편함이 반복됩니다.
             </p>
           </div>
+          <ProblemVisualizer />
           <div className="problem-grid three-col-grid">
             <GlassCard className="problem-card muted-card">
               <span className="problem-symbol">01</span>
