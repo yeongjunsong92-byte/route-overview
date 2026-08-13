@@ -392,47 +392,54 @@ function App() {
           <div className="section-heading split-heading">
             <div>
               <span className="section-kicker">
-                <span className="kicker-line" /> THE TENSION
+                <span className="kicker-line" /> THE PAIN POINTS
               </span>
               <h2>
-                여행 계획은 왜<br />
-                <em>흩어져</em> 있을까?
+                여행을 계획할 때,<br />
+                왜 모든 정보를 <em>따로</em> 찾아야 할까?
               </h2>
             </div>
             <p>
-              장소는 지도에, 후기는 SNS에, 이동은 별도의 내비게이션에 남습니다.
-              Route는 그 사이의 단절을 줄이고, 한 번의 선택이 다음 행동으로
-              자연스럽게 이어지는 경험을 설계합니다.
+              식당은 블로그에서, 명소는 SNS에서, 숙소는 예약 앱에서 각각 따로 검색하고
+              캡처하거나 링크를 복사해 메모장에 남깁니다. 하지만 장소를 모두 모은 뒤에도
+              이동 경로와 하루의 리듬을 다시 직접 조합해야 하는 불편함이 반복됩니다.
             </p>
           </div>
-          <div className="problem-grid">
+          <div className="problem-grid three-col-grid">
             <GlassCard className="problem-card muted-card">
               <span className="problem-symbol">01</span>
-              <span className="problem-tag">BEFORE</span>
+              <span className="problem-tag">SCATTERED</span>
               <h3>
-                찾고, 저장하고,
-                <br />
-                다시 조합하는 일
+                정보의 파편화
               </h3>
               <p>
-                지도 앱, 블로그, 메모장을 오가며 장소를 수집하지만 실제 동선과
-                하루의 리듬은 마지막까지 비어 있습니다.
+                식당, 카페, 숙소가 각각 다른 앱과 웹사이트에 흩어져 있어 캡처와 링크를 일일이 모아야 합니다.
+              </p>
+              <div className="broken-line">
+                <span /> <span /> <span />
+              </div>
+            </GlassCard>
+            <GlassCard className="problem-card muted-card">
+              <span className="problem-symbol">02</span>
+              <span className="problem-tag">DISCONNECTED</span>
+              <h3>
+                동선의 단절
+              </h3>
+              <p>
+                장소들은 수집했지만 현장에 도착하면 실제 이동 순서와 DAY별 리듬이 맞지 않아 헤매게 됩니다.
               </p>
               <div className="broken-line">
                 <span /> <span /> <span />
               </div>
             </GlassCard>
             <GlassCard className="problem-card solution-card">
-              <span className="problem-symbol accent-symbol">02</span>
+              <span className="problem-symbol accent-symbol">03</span>
               <span className="problem-tag accent-tag">ROUTE'S ANSWER</span>
               <h3>
-                발견을 바로
-                <br />
-                <em>이동</em>으로 바꾸는 일
+                하나로 이어지는 <em>Route</em>
               </h3>
               <p>
-                장소를 선택하는 순간 route line이 생기고, DAY 일정과 다음
-                목적지가 하나의 화면 안에서 연결됩니다.
+                검색부터 코스 생성, 지도 연동, 현장 내비게이션까지 하나의 앱 안에서 끊김 없이 연결됩니다.
               </p>
               <div className="connected-line">
                 <span />
